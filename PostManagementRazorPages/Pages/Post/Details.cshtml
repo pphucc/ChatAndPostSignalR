@@ -1,0 +1,101 @@
+﻿@page
+@model PostManagementRazorPages.Pages.Post.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+<div class="post-card">
+    <!-- Post Header with user profile and title -->
+    <div class="post-header">
+        <img src=@Model.Post.AppUser.ProfilePicture alt="Profile Picture" class="profile-picture">
+        <div class="post-info">
+            <h2 class="post-title">@Model.Post.Title</h2>
+            <span class="post-date">  @(Model.Post.CreatedDate.HasValue ? Model.Post.CreatedDate.Value.ToString("MMMM dd, yyyy - hh:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "No date available")</span>
+        </div>
+    </div>
+
+    <!-- Post Content -->
+    <div class="post-content">
+        <p>@Model.Post.Content</p>
+    </div>
+
+    <!-- Post Actions -->
+    <div class="post-actions">
+        <button class="action-button">Like</button>
+        <button class="action-button">Comment</button>
+        <button class="action-button">Share</button>
+    </div>
+</div>
+
+<a class="back-link" asp-page="./Index">Back to Posts</a>
+
+<!-- Add some inline CSS to mimic Facebook's design -->
+<style>
+    .post-card {
+        max-width: 600px;
+        margin: 20px auto;
+        padding: 15px;
+        border-radius: 10px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+    }
+    .post-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    .profile-picture {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+    .post-info {
+        display: flex;
+        flex-direction: column;
+    }
+    .post-title {
+        font-size: 1.2rem;
+        margin: 0;
+    }
+    .post-date {
+        font-size: 0.8rem;
+        color: #666;
+    }
+    .post-content {
+        font-size: 1rem;
+        margin-bottom: 15px;
+        line-height: 1.6;
+        color: #333;
+    }
+    .post-actions {
+        display: flex;
+        justify-content: space-around;
+        border-top: 1px solid #eee;
+        padding-top: 10px;
+    }
+    .action-button {
+        background-color: transparent;
+        border: none;
+        color: #1877F2;
+        cursor: pointer;
+        font-size: 1rem;
+        padding: 5px 15px;
+        transition: color 0.3s;
+    }
+    .action-button:hover {
+        color: #145db2;
+    }
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: #1877F2;
+        text-decoration: none;
+    }
+    .back-link:hover {
+        text-decoration: underline;
+    }
+</style>

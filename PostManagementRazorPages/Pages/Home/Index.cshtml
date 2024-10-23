@@ -1,0 +1,334 @@
+﻿@page
+@model PostManagementRazorPages.Pages.Home.IndexModel
+@{
+    ViewData["Title"] = "Post Feed";
+}
+
+
+<style>
+    .post-card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: none;
+        border-radius: 8px;
+    }
+
+        .post-card .card-body {
+            padding: 20px;
+        }
+
+        .post-card .card-footer {
+            border-top: 1px solid #eee;
+        }
+
+        .post-card img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+        }
+
+        .post-card h6 {
+            font-size: 1rem;
+        }
+
+        .post-card h5 {
+            font-size: 1.25rem;
+            margin-top: 10px;
+        }
+
+        .post-card p {
+            font-size: 1rem;
+        }
+
+    .btn-outline-secondary {
+        color: #6c757d;
+        border-color: #6c757d;
+    }
+
+        .btn-outline-secondary:hover {
+            color: white;
+            background-color: #6c757d;
+        }
+
+</style>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <!-- 'What's on your mind?' Section -->
+        <div class="col-md-8 ">
+            <div class="card mb-4 post-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center w-100" onclick="openCreateModal()" style="cursor: pointer;">
+                        <img src="@HttpContext.Session.GetString("ProfilePicture")" class="rounded-circle mr-3" alt="User Profile Picture">
+                        <div class="w-75">
+                            <h6 class="mb-0 mx-2 p-3 w-100 rounded-pill border">@HttpContext.Session.GetString("FullName"), what's on your mind?</h6>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr class="col-md-6" />
+
+        <div class="col-md-8">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="card mb-4 post-card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <img src="@post.AppUser.ProfilePicture" class="rounded-circle mr-3" alt="User Profile Picture" />
+                                <div class="mx-2">
+                                    <h6 class="mb-0 font-weight-bold">@post.AppUser.FullName</h6>
+                                    <small class="text-muted">
+                                        @(post.CreatedDate.HasValue ? post.CreatedDate.Value.ToString("MMMM dd, yyyy - hh:mm tt", System.Globalization.CultureInfo.InvariantCulture) : "No date available")
+                                    </small>
+                                </div>
+                            </div>
+                            @if (HttpContext.Session.GetString("UserId") == (post.UserId.ToString()))
+                            {
+
+                                <div class="ml-auto dropdown">
+                                    <button class="btn btn-link text-muted" id="dropdownMenuButton-@post.PostId" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fa-solid fa-ellipsis-vertical"></i>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton-@post.PostId">
+                                        <li>
+                                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#editPostModal-@post.PostId">Edit</button>
+                                        </li>
+                                        <li>
+                                            <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#deletePostModal-@post.PostId">Delete</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+
+                        <h5 class="card-title">@post.Title</h5>
+                        @* <p class="card-text">@post.Content</p> *@
+                        <div class="card-text">
+                            @Html.Raw(post.Content)
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                        @* <a href="/Post/Details?id=@post.PostId" class="btn btn-link text-decoration-none">View Post</a> *@
+                        <div>
+                            <button class="btn btn-outline-secondary btn-sm mr-2">Like</button>
+                            <button class="btn btn-outline-secondary btn-sm">Comment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Edit Post Modal -->
+                <div class="modal fade" id="editPostModal-@post.PostId" tabindex="-1" aria-labelledby="editPostModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editPostModalLabel">Edit Post</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="post" asp-page-handler="EditPost" asp-route-postId="@post.PostId">
+                                <div class="modal-body">
+                                    <input type="hidden" name="PostId" value="@post.PostId" />
+                                    <div class="mb-3">
+                                        <label for="postTitle" class="form-label">Title</label>
+                                        <input type="text" class="form-control" id="postTitle" name="Title" value="@post.Title" required />
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="postContent" class="form-label">Content</label>
+                                        <textarea class="form-control" id="postContent" name="Content" rows="3" required>@post.Content</textarea>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Post Modal -->
+                <div class="modal fade" id="deletePostModal-@post.PostId" tabindex="-1" aria-labelledby="deletePostModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="deletePostModalLabel">Delete Post</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form method="post" asp-page-handler="DeletePost" asp-route-postId="@post.PostId">
+                                <div class="modal-body">
+                                    <input type="hidden" name="PostId" value="@post.PostId" />
+                                    <p>Are you sure you want to delete this post?</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        @if (Model.CurrentPage > 1)
+        {
+            <a class="btn btn-outline-primary" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage - 1)">Previous</a>
+        }
+        else
+        {
+            <span></span>
+        }
+
+        @if (Model.Posts.Count == Model.PageSize)
+        {
+            <a class="btn btn-outline-primary" asp-page="Index" asp-route-pageNumber="@(Model.CurrentPage + 1)">Next</a>
+        }
+    </div>
+</div>
+<!-- Modal Structure -->
+<div id="createPostModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 5px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); z-index: 1000;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+        <h5 id="createPostModalLabel">Create Post</h5>
+        <button type="button" onclick="closeCreateModal()" style="border: none; background: none; cursor: pointer;">
+            <span>&times;</span>
+        </button>
+    </div>
+    <div>
+        <form method="post" asp-page-handler="CreatePost">
+            <div class="mb-3">
+                <label for="postTitle" class="form-label">Title</label>
+                <input type="text" class="form-control" id="postTitle" name="Title" required />
+            </div>
+            <div class="form-group">
+                <textarea name="Content" class="form-control" rows="3" placeholder="What's on your mind?" required></textarea>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-top:15px;">
+                <button type="button" class="btn btn-outline-secondary btn-sm" onclick="closeCreateModal()">Close</button>
+                <button type="submit" class="btn btn-outline-secondary btn-sm" style="margin-left: 10px;">Post</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+<div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<i id="floatingChatIcon" class="fa-regular fa-comments" style="position: fixed; bottom: 30px; right: 20px; font-size: 24px; background-color: #007bff; color: white; border-radius: 50%; padding: 10px; cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);"></i>
+
+<div id="chatDiv" class="card mb-4" style="position: fixed; bottom: 20px; right: 20px; width: 300px; z-index: 1000;">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>Chat</span>
+        <button id="closeChat" class="btn btn-link">
+            <i class="fas fa-minus"></i>
+        </button>
+    </div>
+    <div class="card-body" id="chatMessages" style="height: 400px; overflow-y: auto;">
+        <!-- Chat messages will be displayed here -->
+    </div>
+    <div class="card-footer" id="chatFooter">
+        <form id="chatForm">
+            <input hidden id="userId" value="@HttpContext.Session.GetString("UserId")" />
+            <input hidden id="userName" value="@HttpContext.Session.GetString("FullName")" />
+            <input hidden id="userProfile" value="@HttpContext.Session.GetString("ProfilePicture")" />
+            <div class="input-group">
+                <input type="text" class="form-control" id="chatInput" placeholder="Type a message..." required>
+                <button class="btn btn-primary" type="submit">Send</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        document.getElementById("floatingChatIcon").addEventListener("click", function () {
+            document.getElementById("chatDiv").style.display = "block";
+            this.style.display = "none";
+        });
+
+        document.getElementById("closeChat").addEventListener("click", function () {
+            document.getElementById("chatDiv").style.display = "none";
+            document.getElementById("floatingChatIcon").style.display = "block";
+        });
+
+        document.getElementById("chatDiv").style.display = "none";
+
+
+        function openCreateModal() {
+            document.getElementById("overlay").style.display = "block"; // Show overlay
+            document.getElementById("createPostModal").style.display = "block"; // Show modal
+        }
+
+        function closeCreateModal() {
+            document.getElementById("overlay").style.display = "none"; // Hide overlay
+            document.getElementById("createPostModal").style.display = "none"; // Hide modal
+        }
+
+    </script>
+
+
+    <script>
+        const chat_connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chathub")
+            .build();
+
+        chat_connection.on("ReceiveMessage", function (userId, userProfile, message) {
+            const chatMessages = document.getElementById("chatMessages");
+            const messageElement = document.createElement("div");
+            const userIdCurrent = document.getElementById("userId").value;
+
+            const messageContainer = document.createElement("div");
+            messageContainer.style.display = "flex";
+            messageContainer.style.alignItems = "center";
+            messageContainer.style.marginBottom = "10px";
+
+            const profileImg = document.createElement("img");
+            profileImg.src = userProfile;
+            profileImg.alt = userId;
+            profileImg.style.width = "30px";
+            profileImg.style.height = "30px";
+            profileImg.style.borderRadius = "50%";
+            profileImg.style.marginRight = "10px";
+
+            const textElement = document.createElement("div");
+            textElement.textContent = message;
+            textElement.style.backgroundColor = userId === userIdCurrent ? "#e0f7fa" : "#f1f0f0";
+            textElement.style.padding = "8px 12px";
+            textElement.style.borderRadius = "10px";
+            textElement.style.maxWidth = "70%";
+
+            if (userId === userIdCurrent) {
+                messageContainer.style.justifyContent = "flex-end";
+                messageContainer.appendChild(textElement);
+            } else {
+                messageContainer.appendChild(profileImg);
+                messageContainer.appendChild(textElement);
+            }
+
+            chatMessages.appendChild(messageContainer);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+
+        chat_connection.start().catch(function (err) {
+            return console.error(err.toString());
+        });
+
+        document.getElementById("chatForm").addEventListener("submit", function (event) {
+            event.preventDefault();
+            const messageInput = document.getElementById("chatInput");
+            const userId = document.getElementById("userId").value;
+            const userName = document.getElementById("userName").value;
+            const userProfile = document.getElementById("userProfile").value;
+            const message = messageInput.value;
+
+            chat_connection.invoke("SendMessage", userId, userProfile, message).catch(function (err) {
+                return console.error(err.toString());
+            });
+
+            messageInput.value = "";
+        });
+    </script>
+}
+
