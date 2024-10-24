@@ -7,6 +7,7 @@ using System.Text;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using System.Diagnostics.CodeAnalysis;
 
 namespace PostManagementRazorPages.Pages
 {
@@ -109,6 +110,7 @@ namespace PostManagementRazorPages.Pages
         public string Password { get; set; }
 
         [DataType(DataType.Upload)]
-        public IFormFile ProfilePicture { get; set; }
+        [AllowNull]
+        public IFormFile? ProfilePicture { get; set; }
     }
 }

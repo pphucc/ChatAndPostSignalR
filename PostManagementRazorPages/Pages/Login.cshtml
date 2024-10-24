@@ -9,17 +9,17 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form method="post" class="shadow p-4 rounded bg-light">
+            <form id="loginForm" method="post" class="shadow p-4 rounded bg-light" onsubmit="return validateForm()">
                 <div class="form-group mb-3">
                     <label asp-for="Input.Email" class="form-label"></label>
-                    <input asp-for="Input.Email" class="form-control" placeholder="Enter your email" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    <input asp-for="Input.Email" id="email" class="form-control" placeholder="Enter your email" />
+                    <span id="emailError" class="text-danger"></span>
                 </div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Input.Password" class="form-label"></label>
-                    <input asp-for="Input.Password" type="password" class="form-control" placeholder="Enter your password" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    <input asp-for="Input.Password" id="password" type="password" class="form-control" placeholder="Enter your password" />
+                    <span id="passwordError" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3 text-center">
@@ -35,5 +35,37 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateForm() {
+            var email = document.getElementById("email").value;
+            var password = document.getElementById("password").value;
+            var emailError = document.getElementById("emailError");
+            var passwordError = document.getElementById("passwordError");
+
+            // Reset error messages
+            emailError.innerHTML = "";
+            passwordError.innerHTML = "";
+
+            // Email validation using regex
+            var emailPattern = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            var isValid = true;
+
+            if (!email) {
+                emailError.innerHTML = "Email is required.";
+                isValid = false;
+            } else if (!emailPattern.test(email)) {
+                emailError.innerHTML = "Invalid email format.";
+                isValid = false;
+            }
+
+            // Password validation
+            if (!password) {
+                passwordError.innerHTML = "Password is required.";
+                isValid = false;
+            }
+
+            // Prevent form submission if validation fails
+            return isValid;
+        }
+    </script>
 }

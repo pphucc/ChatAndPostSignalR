@@ -9,36 +9,36 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <form method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light">
+            <form id="registerForm" method="post" enctype="multipart/form-data" class="shadow p-4 rounded bg-light" onsubmit="return validateForm()">
                 <div class="form-group mb-3">
                     <label asp-for="Input.FullName" class="form-label"></label>
-                    <input asp-for="Input.FullName" class="form-control" placeholder="Enter your full name" />
-                    <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                    <input asp-for="Input.FullName" class="form-control" id="fullName" placeholder="Enter your full name" />
+                    <span class="text-danger" id="fullNameError"></span>
                 </div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Input.Address" class="form-label"></label>
-                    <input asp-for="Input.Address" class="form-control" placeholder="Enter your address" />
-                    <span asp-validation-for="Input.Address" class="text-danger"></span>
+                    <input asp-for="Input.Address" class="form-control" id="address" placeholder="Enter your address" />
+                    <span class="text-danger" id="addressError"></span>
                 </div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Input.Email" class="form-label"></label>
-                    <input asp-for="Input.Email" class="form-control" placeholder="Enter your email" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                    <input asp-for="Input.Email" class="form-control" id="email" placeholder="Enter your email" />
+                    <span class="text-danger" id="emailError"></span>
                 </div>
 
                 <div class="form-group mb-3">
                     <label asp-for="Input.Password" class="form-label"></label>
-                    <input asp-for="Input.Password" type="password" class="form-control" placeholder="Enter your password" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                    <input asp-for="Input.Password" type="password" class="form-control" id="password" placeholder="Enter your password" />
+                    <span class="text-danger" id="passwordError"></span>
                 </div>
 
                 <!-- New profile picture upload field -->
                 <div class="form-group mb-3">
                     <label asp-for="Input.ProfilePicture" class="form-label">Profile Picture</label>
-                    <input asp-for="Input.ProfilePicture" type="file" class="form-control" />
-                    <span asp-validation-for="Input.ProfilePicture" class="text-danger"></span>
+                    <input asp-for="Input.ProfilePicture" type="file" class="form-control" id="profilePicture" />
+                    <span class="text-danger" id="profilePictureError"></span>
                 </div>
 
                 <div class="mb-3 text-center">
@@ -54,5 +54,79 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <script>
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous error messages
+            document.getElementById("fullNameError").textContent = "";
+            document.getElementById("addressError").textContent = "";
+            document.getElementById("emailError").textContent = "";
+            document.getElementById("passwordError").textContent = "";
+            document.getElementById("profilePictureError").textContent = "";
+
+            // Full Name validation
+            const fullName = document.getElementById("fullName").value.trim(); // Trim leading/trailing spaces
+            const nameRegex = /^[a-zA-ZÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỐỒỔỖỘỚỜỞỠỢỤỦỨỪễềếốồổỗộớờởỡợụủứừửữựỳỵỷỹỲỴỶỸ\s]+$/u; // Supports Vietnamese characters, letters, and spaces
+
+            if (fullName.length < 2 || fullName.length > 100) {
+                document.getElementById("fullNameError").textContent = "Full name must be between 2 and 100 characters.";
+                isValid = false;
+            } else if (!nameRegex.test(fullName)) {
+                document.getElementById("fullNameError").textContent = "Full name can only contain letters, spaces, and valid Vietnamese characters.";
+                isValid = false;
+            } else if (/\s{2,}/.test(fullName)) { // Check for multiple consecutive spaces
+                document.getElementById("fullNameError").textContent = "Full name cannot contain multiple consecutive spaces.";
+                isValid = false;
+            } else {
+                document.getElementById("fullNameError").textContent = ""; // Clear the error message if validation passes
+            }
+
+
+
+            // Address validation
+            const address = document.getElementById("address").value.trim(); // Trim leading/trailing spaces
+            const addressRegex = /^[a-zA-Z0-9\s,.-]+$/; // Allows letters, numbers, spaces, commas, periods, and hyphens
+
+            if (address === "") {
+                document.getElementById("addressError").textContent = "Address is required.";
+                isValid = false;
+            } else if (address.length < 5 || address.length > 200) {
+                document.getElementById("addressError").textContent = "Address must be between 5 and 200 characters.";
+                isValid = false;
+            } else if (!addressRegex.test(address)) {
+                document.getElementById("addressError").textContent = "Address can only contain letters, numbers, spaces, commas, periods, and hyphens.";
+                isValid = false;
+            }
+
+
+            // Email validation
+            const email = document.getElementById("email").value;
+            const emailRegex = /^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/;
+            if (!emailRegex.test(email)) {
+                document.getElementById("emailError").textContent = "Invalid email format.";
+                isValid = false;
+            }
+
+            // Password validation
+            const password = document.getElementById("password").value;
+            if (password.length < 6) {
+                document.getElementById("passwordError").textContent = "Password must be at least 6 characters long.";
+                isValid = false;
+            }
+
+            // Profile Picture validation
+            const profilePicture = document.getElementById("profilePicture").files[0];
+            if (profilePicture) {
+                const allowedExtensions = /(\.jpg|\.jpeg|\.png)$/i;
+                if (!allowedExtensions.exec(profilePicture.name)) {
+                    document.getElementById("profilePictureError").textContent = "Only .jpg, .jpeg, and .png files are allowed.";
+                    isValid = false;
+                }
+            }
+
+            // Submit form if valid
+            return isValid;
+        }
+    </script>
 }

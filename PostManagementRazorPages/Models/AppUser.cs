@@ -22,6 +22,6 @@ namespace PostManagementRazorPages.Models
         public string Password { get; set; } = string.Empty;
 
         [Url]
-        public string ProfilePicture { get; set; } = string.Empty;  // New property to store the image URL
+        public string? ProfilePicture { get; set; } = string.Empty;  // New property to store the image URL
     }
 }
